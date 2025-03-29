@@ -304,3 +304,75 @@ def update_parameters(parameters, grads, learning_rate):
         parameters["b" + str(l)] -= learning_rate * grads["db" + str(l)]
 
     return parameters
+
+
+def l_layer_model(X, Y, layers_dims, learning_rate, num_iterations, batch_size):
+    """
+    Implements a L-layer neural network. All layers but the last should have the ReLU activation function,
+    and the final layer will apply the softmax activation function.
+    The size of the output layer should be equal to the number of labels in the data.
+    Please select a batch size that enables your code to run well
+    (i.e. no memory overflows while still running relatively fast).
+    Args:
+        X: the input data, a numpy array of shape (height*width , number_of_examples)
+            Comment: since the input is in grayscale we only have height and width, otherwise it would have been height*width*3
+        Y: the “real” labels of the data, a vector of shape (num_of_classes, number of examples)
+        layers_dims: a list containing the dimensions of each layer, including the input
+        learning_rate: The learning rate used during gradient descent.
+                Controls how large the parameter updates are after each step.
+        num_iterations:
+            The number of training examples used in each mini-batch. Affects training stability and speed.
+        batch_size: the number of examples in a single training batch.
+
+    Returns:
+        parameters – the parameters learnt by the system during the training
+        (the same parameters that were updated in the update_parameters function).
+        costs – the values of the cost function (calculated by the compute_cost function).
+         One value is to be saved after each 100 training iterations (e.g. 3000 iterations -> 30 values).
+    """
+
+    parameters = initialize_parameters(layers_dims)
+    costs = []
+    m = X.shape[1]
+    num_batches = m // batch_size + int(m % batch_size != 0)
+    for i in range(1, num_iterations + 1):
+
+        permutation = np.random.permutation(m)
+        X_shuffled = X[:, permutation]
+        Y_shuffled = Y[:, permutation]
+        epoch_cost = 0
+        for j in range(0, m, batch_size):
+            X_batch = X_shuffled[:, j:j + batch_size]
+            Y_batch = Y_shuffled[:, j:j + batch_size]
+
+            AL, caches = l_model_forward(X_batch, parameters, False)
+            epoch_cost += compute_cost(AL, Y_batch)
+            grads = l_model_backward(AL, Y_batch, caches)
+            parameters = update_parameters(parameters, grads, learning_rate)
+        if i % 100 == 0:
+            costs.append(epoch_cost / num_batches)
+    return parameters, costs
+
+
+def predict(X: np.ndarray, Y: np.ndarray, parameters: Dict):
+    """
+    The function receives an input data and the true labels and calculates the accuracy of the trained neural network on the data
+    Args:
+        X: the input data, a numpy array of shape (height*width, number_of_examples)
+        Y: the “real” labels of the data, a vector of shape (num_of_classes, number of examples)
+        parameters: a python dictionary containing the DNN architecture’s parameters
+
+    Returns:
+        accuracy – the accuracy measure of the neural net on the provided data
+        (i.e. the percentage of the samples for which the correct label receives the highest confidence score).
+        Use the softmax function to normalize the output values.
+    """
+    # Forward pass
+    AL, _ = l_model_forward(X, parameters, use_batchnorm=False)
+
+    predictions = np.argmax(AL, axis=0)
+    true_labels = np.argmax(Y, axis=0)
+
+    accuracy = np.mean(predictions == true_labels) * 100
+
+    return accuracy
