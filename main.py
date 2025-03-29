@@ -3,27 +3,39 @@ from pprint import pprint
 
 
 def main():
-    # Define the architecture: 4 input features, two hidden layers with 3 and 2 units, and 4 output classes
-    layer_dims = [4, 3, 2, 4]
+
+    # Dummy input and one-hot labels (2 examples)
+    np.random.seed(95)
+    X = np.random.randn(4, 2)
+    Y = np.array([[1, 0], [0, 1]])
+
+    # Model configuration
+    layer_dims = [4, 3, 2]
+    learning_rate = 0.00001
+    num_iterations = 10000
 
     # Initialize parameters
     parameters = initialize_parameters(layer_dims)
 
-    # Create sample input data: 4 features (rows) and 5 examples (columns)
-    np.random.seed(0)  # For reproducibility
-    X_sample = np.random.randn(4, 5)
+    for i in range(num_iterations):
+        # Forward
+        AL, caches = l_model_forward(X, parameters, use_batchnorm=False)
+        print(f'{AL=}')
+        # Cost
+        cost = compute_cost(AL, Y)
 
-    # Perform forward propagation
-    AL, caches = l_model_forward(X_sample, parameters, use_batchnorm=True)
+        # Backward
+        grads = l_model_backward(AL, Y, caches)
 
-    # Display the output
-    print("Output of the final layer (AL):")
-    pprint(AL)
+        # Update
+        parameters = update_parameters(parameters, grads, learning_rate)
 
-    print("\nNumber of caches stored:")
-    print(len(caches))
-    for ca in caches:
-        print(ca)
+        # Print cost every 10 iterations
+        if i % 10 == 0 or i == num_iterations - 1:
+            print(f"Iteration {i} - Cost: {cost:.6f}")
+
+    # Show improvement in W1
+    print("\nFinal W1:\n", parameters["W1"])
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ def initialize_parameters(layer_dims: List[int]) -> Dict:
     """
     parameters = {}
     for i in range(1, len(layer_dims)):
-        parameters[f"W{i}"] = np.random.rand(layer_dims[i], layer_dims[i - 1])
+        parameters[f"W{i}"] = np.random.rand(layer_dims[i], layer_dims[i - 1]) * 0.01
         parameters[f"b{i}"] = np.zeros((layer_dims[i], 1))
 
     return parameters
@@ -48,8 +48,9 @@ def softmax(Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
         activation_cache – returns Z, which will be useful for the backpropagation
 
     """
-    exp_z = np.exp(Z)
-    A = np.sum(exp_z, axis=0, keepdims=True)
+    shift_z = np.max(Z, axis=0, keepdims=True)
+    exp_z = np.exp(Z - shift_z)
+    A = exp_z / np.sum(exp_z, axis=0, keepdims=True)
     return A, {'Z': Z}
 
 
@@ -133,7 +134,7 @@ def l_model_forward(X: np.ndarray, parameters: Dict, use_batchnorm: bool) -> Tup
     return AL, caches
 
 
-def compute_cost(AL: np.ndarray, Y: np.ndarray) -> int:
+def compute_cost(AL: np.ndarray, Y: np.ndarray) -> float:
     """
     Implement the cost function defined by equation. The requested cost function is categorical cross-entropy loss
     Args:
@@ -144,6 +145,7 @@ def compute_cost(AL: np.ndarray, Y: np.ndarray) -> int:
         cost – the cross-entropy cost
     """
     m = Y.shape[1]
+    AL = np.clip(AL, 1e-12, 1. - 1e-12)
 
     cost = -np.sum(Y * np.log(AL)) / m
 
@@ -166,7 +168,7 @@ def apply_batchnorm(A: np.ndarray) -> np.ndarray:
 
 
 def linear_backward(dZ: np.ndarray, cache: Dict) -> Tuple[
-        np.ndarray, np.ndarray, np.ndarray]:
+    np.ndarray, np.ndarray, np.ndarray]:
     """
     Implements the linear part of the backward propagation process for a single layer
     Args:
@@ -240,9 +242,10 @@ def softmax_backward(dA, activation_cache):
         dZ – gradient of the cost with respect to Z
 
     """
+    return dA
 
 
-def l_model_backward(AL, Y, caches):
+def l_model_backward(AL: np.ndarray, Y: np.ndarray, caches: List):
     """
     Implement the backward propagation process for the entire network.
     Args:
@@ -260,6 +263,27 @@ def l_model_backward(AL, Y, caches):
         the backpropagation for the softmax function should be done only once as only the
          output layers uses it and the RELU should be done iteratively over all the remaining layers of the network.
     """
+    grads = {}
+    L = len(caches)
+    dz = AL - Y
+    cache = caches[-1]
+    dA_prev, dW, db = linear_backward(dz, cache)
+    grads["dA" + str(L - 1)] = dA_prev
+    grads["dW" + str(L)] = dW
+    grads["db" + str(L)] = db
+
+    for l in reversed(range(L - 1)):
+        current_cache = caches[l]
+
+        dA = grads["dA" + str(l + 1)]
+        dZ = relu_backward(dA, current_cache)
+        dA_prev, dW, db = linear_backward(dZ, current_cache)
+
+        grads["dA" + str(l)] = dA_prev
+        grads["dW" + str(l + 1)] = dW
+        grads["db" + str(l + 1)] = db
+
+    return grads
 
 
 def update_parameters(parameters, grads, learning_rate):
@@ -273,3 +297,10 @@ def update_parameters(parameters, grads, learning_rate):
     Returns:
         parameters – the updated values of the parameters object provided as input
     """
+    L = len(parameters) // 2  # number of layers
+
+    for l in range(1, L + 1):
+        parameters["W" + str(l)] -= learning_rate * grads["dW" + str(l)]
+        parameters["b" + str(l)] -= learning_rate * grads["db" + str(l)]
+
+    return parameters
