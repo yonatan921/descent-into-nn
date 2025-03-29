@@ -3,105 +3,111 @@ from typing import List, Tuple, Dict
 import numpy as np
 
 
-class NeuralNetwork:
+def initialize_parameters(layer_dims: List[int]) -> Dict:
+    """
 
-    def initialize_parameters(self, layer_dims: List[int]) -> Dict:
-        """
+    Args:
+        layer_dims: an array of the dimensions of each layer in the network
+         (layer 0 is the size of the flattened input, layer L is the output softmax)
 
-        Args:
-            layer_dims: an array of the dimensions of each layer in the network
-             (layer 0 is the size of the flattened input, layer L is the output softmax)
+    Returns:
+        A dictionary containing the initialized W and b parameters of each layer (W1…WL, b1…bL).
+    """
+    pass
 
-        Returns:
-            A dictionary containing the initialized W and b parameters of each layer (W1…WL, b1…bL).
-        """
-        pass
 
-    def linear_forward(self, A: np.ndarray, W: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, Dict]:
-        """
-        Implement the linear part of a layer's forward propagation.
-        Args:
-            A: The activations of the previous layer
-            W: The weight matrix of the current layer (of shape [size of current layer, size of previous layer])
-            b: The bias vector of the current layer (of shape [size of current layer, 1])
+def linear_forward(A: np.ndarray, W: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, Dict]:
+    """
+    Implement the linear part of a layer's forward propagation.
+    Args:
+        A: The activations of the previous layer
+        W: The weight matrix of the current layer (of shape [size of current layer, size of previous layer])
+        b: The bias vector of the current layer (of shape [size of current layer, 1])
 
-        Returns:
-            Z – the linear component of the activation function (i.e., the value before applying the non-linear function)
-            linear_cache – a dictionary containing A, W, b (stored for making the backpropagation easier to compute)
+    Returns:
+        Z – the linear component of the activation function (i.e., the value before applying the non-linear function)
+        linear_cache – a dictionary containing A, W, b (stored for making the backpropagation easier to compute)
 
-        """
-        pass
+    """
+    pass
 
-    def softmax(self, Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
-        """
 
-        Args:
-            Z: The linear component of the activation function
+def softmax(Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
+    """
 
-        Returns:
-            A – the activations of the layer
-            activation_cache – returns Z, which will be useful for the backpropagation
+    Args:
+        Z: The linear component of the activation function
 
-        """
+    Returns:
+        A – the activations of the layer
+        activation_cache – returns Z, which will be useful for the backpropagation
 
-    def relu(self, Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
-        """
+    """
 
-        Args:
-            Z: The linear component of the activation function
 
-        Returns:
-            A – the activations of the layer
-            activation_cache – returns Z, which will be useful for the backpropagation
+def relu(Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
+    """
 
-         """
+    Args:
+        Z: The linear component of the activation function
 
-    def linear_activation_forward(self, A_prev: np.ndarray, W: np.ndarray, B: np.ndarray, activation: str) -> Tuple[
-        np.ndarray, Dict]:
-        """
-        Implement the forward propagation for the LINEAR->ACTIVATION layer
-        Args:
-            A_prev: activations of the previous layer
-            W: the weights matrix of the current layer
-            B: the bias vector of the current layer
-            activation: the activation function to be used (a string, either “softmax” or “relu”)
+    Returns:
+        A – the activations of the layer
+        activation_cache – returns Z, which will be useful for the backpropagation
 
-        Returns:
-            A – the activations of the current layer
-            cache – a joint dictionary containing both linear_cache and activation_cache
+     """
 
-        """
 
-    def l_model_forward(self, X: np.ndarray, parameters: Dict, use_batchnorm: bool) -> Tuple[np.ndarray, Dict]:
-        """
-        Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX computation
-        Args:
-            X: the data, numpy array of shape (input size, number of examples)
-            parameters: the initialized W and b parameters of each layer
-            use_batchnorm: a boolean flag used to determine whether to apply batchnorm after the activation
+def linear_activation_forward(A_prev: np.ndarray, W: np.ndarray, B: np.ndarray, activation: str) -> Tuple[
+    np.ndarray, Dict]:
+    """
+    Implement the forward propagation for the LINEAR->ACTIVATION layer
+    Args:
+        A_prev: activations of the previous layer
+        W: the weights matrix of the current layer
+        B: the bias vector of the current layer
+        activation: the activation function to be used (a string, either “softmax” or “relu”)
 
-        Returns:
-            AL – the last post-activation value
-            caches – a list of all the cache objects generated by the linear_forward function
+    Returns:
+        A – the activations of the current layer
+        cache – a joint dictionary containing both linear_cache and activation_cache
 
-        """
+    """
 
-    def compute_cost(self, AL: np.ndarray, Y: np.ndarray) -> int:
-        """
-        Implement the cost function defined by equation. The requested cost function is categorical cross-entropy loss
-        Args:
-            AL: probability vector corresponding to your label predictions, shape (num_of_classes, number of examples)
-            Y: the labels vector (i.e. the ground truth)
 
-        Returns:
-            cost – the cross-entropy cost
-        """
-    def apply_batchnorm(self, A: np.ndarray) -> np.ndarray:
-        """
-        performs batchnorm on the received activation values of a given layer.
-        Args:
-            A:the activation values of a given layer
+def l_model_forward(X: np.ndarray, parameters: Dict, use_batchnorm: bool) -> Tuple[np.ndarray, Dict]:
+    """
+    Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX computation
+    Args:
+        X: the data, numpy array of shape (input size, number of examples)
+        parameters: the initialized W and b parameters of each layer
+        use_batchnorm: a boolean flag used to determine whether to apply batchnorm after the activation
 
-        Returns:
-            NA - the normalized activation values, based on the formula learned in class
-        """
+    Returns:
+        AL – the last post-activation value
+        caches – a list of all the cache objects generated by the linear_forward function
+
+    """
+
+
+def compute_cost(AL: np.ndarray, Y: np.ndarray) -> int:
+    """
+    Implement the cost function defined by equation. The requested cost function is categorical cross-entropy loss
+    Args:
+        AL: probability vector corresponding to your label predictions, shape (num_of_classes, number of examples)
+        Y: the labels vector (i.e. the ground truth)
+
+    Returns:
+        cost – the cross-entropy cost
+    """
+
+
+def apply_batchnorm(A: np.ndarray) -> np.ndarray:
+    """
+    performs batchnorm on the received activation values of a given layer.
+    Args:
+        A:the activation values of a given layer
+
+    Returns:
+        NA - the normalized activation values, based on the formula learned in class
+    """
