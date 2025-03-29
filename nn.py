@@ -165,8 +165,8 @@ def apply_batchnorm(A: np.ndarray) -> np.ndarray:
     return (A - mean) / np.sqrt(var + epsilon)
 
 
-def linear_backward(dZ: np.ndarray, cache: Tuple[np.ndarray, np.ndarray, np.ndarray]) -> Tuple[
-    np.ndarray, np.ndarray, np.ndarray]:
+def linear_backward(dZ: np.ndarray, cache: Dict) -> Tuple[
+        np.ndarray, np.ndarray, np.ndarray]:
     """
     Implements the linear part of the backward propagation process for a single layer
     Args:
@@ -178,16 +178,22 @@ def linear_backward(dZ: np.ndarray, cache: Tuple[np.ndarray, np.ndarray, np.ndar
         dW -- Gradient of the cost with respect to W (current layer l), same shape as W
         db -- Gradient of the cost with respect to b (current layer l), same shape as b
     """
+    A_prev, W, b = cache["A"], cache["W"], cache["b"]
+    m = A_prev.shape[1]
+    dW = (1 / m) * np.dot(dZ, A_prev.T)
+    db = (1 / m) * np.sum(b, axis=1, keepdims=True)
+    dA_prev = np.dot(W.T, dZ)
+    return dA_prev, dW, db
 
 
-def linear_activation_backward(dA, cache, activation):
+def linear_activation_backward(dA: np.ndarray, cache: Dict, activation: str):
     """
     Implements the backward propagation for the LINEAR->ACTIVATION layer.
     The function first computes dZ and then applies the linear_backward function.
     Args:
         dA:post activation gradient of the current layer
         cache: contains both the linear cache and the activations cache
-        activation:
+        activation: str func
 
     Returns:
         dA_prev – Gradient of the cost with respect to the activation (of the previous layer l-1), same shape as A_prev
@@ -195,6 +201,16 @@ def linear_activation_backward(dA, cache, activation):
         db – Gradient of the cost with respect to b (current layer l), same shape as b
 
     """
+    activations = {
+        'relu': relu_backward,
+        'softmax': softmax_backward
+    }
+    activation = activations.get(activation)
+    if activation is None:
+        raise ValueError(f"Only the following functions are available: {activations.keys()}")
+
+    dz = activation(dA, cache)
+    return linear_backward(dz, cache)
 
 
 def relu_backward(dA, activation_cache) -> np.ndarray:
@@ -207,6 +223,10 @@ def relu_backward(dA, activation_cache) -> np.ndarray:
     Returns:
         dZ – gradient of the cost with respect to Z
     """
+    Z = activation_cache["Z"]
+    dZ = np.array(dA, copy=True)
+    dZ[Z <= 0] = 0
+    return dA
 
 
 def softmax_backward(dA, activation_cache):
