@@ -1,11 +1,11 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import numpy as np
 
 
 class NeuralNetwork:
 
-    def initialize_parameters(self, layer_dims: List[int]) -> dict:
+    def initialize_parameters(self, layer_dims: List[int]) -> Dict:
         """
 
         Args:
@@ -17,7 +17,7 @@ class NeuralNetwork:
         """
         pass
 
-    def linear_forward(self, A: np.array, W: np.array, b: np.array) -> Tuple[np.array, dict]:
+    def linear_forward(self, A: np.ndarray, W: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, Dict]:
         """
         Implement the linear part of a layer's forward propagation.
         Args:
@@ -32,7 +32,7 @@ class NeuralNetwork:
         """
         pass
 
-    def softmax(self, Z: np.array) -> Tuple[np.array, dict]:
+    def softmax(self, Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
         """
 
         Args:
@@ -44,7 +44,7 @@ class NeuralNetwork:
 
         """
 
-    def relu(self, Z: np.array) -> Tuple[np.array, dict]:
+    def relu(self, Z: np.ndarray) -> Tuple[np.ndarray, Dict]:
         """
 
         Args:
@@ -56,8 +56,8 @@ class NeuralNetwork:
 
          """
 
-    def linear_activation_forward(self, A_prev: np.array, W: np.array, B: np.array, activation: str) -> Tuple[
-        np.array, dict]:
+    def linear_activation_forward(self, A_prev: np.ndarray, W: np.ndarray, B: np.ndarray, activation: str) -> Tuple[
+        np.ndarray, Dict]:
         """
         Implement the forward propagation for the LINEAR->ACTIVATION layer
         Args:
@@ -72,7 +72,7 @@ class NeuralNetwork:
 
         """
 
-    def l_model_forward(self, X: np.array, parameters: dict, use_batchnorm: bool) -> Tuple[np.array, dict]:
+    def l_model_forward(self, X: np.ndarray, parameters: Dict, use_batchnorm: bool) -> Tuple[np.ndarray, Dict]:
         """
         Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SOFTMAX computation
         Args:
@@ -86,7 +86,7 @@ class NeuralNetwork:
 
         """
 
-    def compute_cost(self, AL: np.array, Y: np.array) -> int:
+    def compute_cost(self, AL: np.ndarray, Y: np.ndarray) -> int:
         """
         Implement the cost function defined by equation. The requested cost function is categorical cross-entropy loss
         Args:
@@ -96,7 +96,7 @@ class NeuralNetwork:
         Returns:
             cost – the cross-entropy cost
         """
-    def apply_batchnorm(self, A: np.array) -> np.array:
+    def apply_batchnorm(self, A: np.ndarray) -> np.ndarray:
         """
         performs batchnorm on the received activation values of a given layer.
         Args:
