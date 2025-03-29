@@ -12,7 +12,7 @@ def main():
     # Model configuration
     layer_dims = [4, 3, 2]
     learning_rate = 0.00001
-    num_iterations = 10000
+    num_iterations = 100
 
     # Initialize parameters
     parameters = initialize_parameters(layer_dims)

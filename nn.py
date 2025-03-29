@@ -183,7 +183,7 @@ def linear_backward(dZ: np.ndarray, cache: Dict) -> Tuple[
     A_prev, W, b = cache["A"], cache["W"], cache["b"]
     m = A_prev.shape[1]
     dW = (1 / m) * np.dot(dZ, A_prev.T)
-    db = (1 / m) * np.sum(b, axis=1, keepdims=True)
+    db = (1 / m) * np.sum(dZ, axis=1, keepdims=True)
     dA_prev = np.dot(W.T, dZ)
     return dA_prev, dW, db
 
@@ -226,9 +226,8 @@ def relu_backward(dA, activation_cache) -> np.ndarray:
         dZ – gradient of the cost with respect to Z
     """
     Z = activation_cache["Z"]
-    dZ = np.array(dA, copy=True)
-    dZ[Z <= 0] = 0
-    return dA
+    dZ = dA * (Z > 0)
+    return dZ
 
 
 def softmax_backward(dA, activation_cache):
@@ -242,7 +241,8 @@ def softmax_backward(dA, activation_cache):
         dZ – gradient of the cost with respect to Z
 
     """
-    return dA
+    Y = activation_cache['Y']
+    return dA - Y
 
 
 def l_model_backward(AL: np.ndarray, Y: np.ndarray, caches: List):
@@ -265,19 +265,18 @@ def l_model_backward(AL: np.ndarray, Y: np.ndarray, caches: List):
     """
     grads = {}
     L = len(caches)
-    dz = AL - Y
     cache = caches[-1]
-    dA_prev, dW, db = linear_backward(dz, cache)
+    cache['Y'] = Y
+    dA_prev, dW, db = linear_activation_backward(AL, cache, activation='softmax')
     grads["dA" + str(L - 1)] = dA_prev
     grads["dW" + str(L)] = dW
     grads["db" + str(L)] = db
 
     for l in reversed(range(L - 1)):
-        current_cache = caches[l]
+        cache = caches[l]
 
         dA = grads["dA" + str(l + 1)]
-        dZ = relu_backward(dA, current_cache)
-        dA_prev, dW, db = linear_backward(dZ, current_cache)
+        dA_prev, dW, db = linear_activation_backward(dA, cache, activation='relu')
 
         grads["dA" + str(l)] = dA_prev
         grads["dW" + str(l + 1)] = dW
