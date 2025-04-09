@@ -5,6 +5,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from nn import l_model_forward, relu_backward, l_layer_model, predict, compute_cost
 
+import tensorflow as tf
+
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    try:
+        # Set memory growth if needed
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        print("GPU is being used.")
+    except RuntimeError as e:
+        print(e)
+else:
+    print("No GPU detected.")
+
 def analyze_output(AL: np.ndarray):
     print("\nSoftmax Output Analysis")
     print("Shape:", AL.shape)
@@ -16,12 +30,14 @@ def analyze_output(AL: np.ndarray):
     if np.any(np.sum(AL, axis=0) > 1.01) or np.any(np.sum(AL, axis=0) < 0.99):
         print("\u26a0\ufe0f Warning: Some softmax outputs do not sum to ~1")
 
+
 def analyze_input(X: np.ndarray, Y: np.ndarray):
     print("\nInput Analysis")
     print("X shape:", X.shape)
     print("Y shape:", Y.shape)
     print("Y[:, 0]:", Y[:, 0])
     print("Label (argmax of Y[:,0]):", np.argmax(Y[:, 0]))
+
 
 def plot_costs(costs: List[float]):
     plt.plot(np.arange(100, 100 * len(costs) + 1, 100), costs)
@@ -31,6 +47,7 @@ def plot_costs(costs: List[float]):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
 
 def test_relu_backward():
     Z = np.array([[-1.0, 0.0, 2.0]])
@@ -42,6 +59,7 @@ def test_relu_backward():
     print("dA:", dA)
     print("dZ:", dZ)
 
+
 def sanity_check_parameters(parameters: Dict):
     print("\nSanity Check on Parameters")
     for k, v in parameters.items():
@@ -49,6 +67,7 @@ def sanity_check_parameters(parameters: Dict):
             print(f"\u26a0\ufe0f Warning: {k} contains NaNs or Infs")
         else:
             print(f"{k}: mean={np.mean(v):.4f}, std={np.std(v):.4f}, shape={v.shape}")
+
 
 if __name__ == '__main__':
 
@@ -62,6 +81,12 @@ if __name__ == '__main__':
     test_X = test_X.reshape(test_X.shape[0], -1).T / 255.0
     train_y = to_categorical(train_y).T
     test_y = to_categorical(test_y).T
+
+    parameters, cost = l_layer_model(train_X, train_y, layers_dims, learning_rate, 100, batch_size)
+    test_acc = predict(test_X, test_y, parameters)
+    print(f"{test_acc=}")
+    exit(0)
+
 
     m_train = train_X.shape[1]
     perm = np.random.permutation(m_train)
