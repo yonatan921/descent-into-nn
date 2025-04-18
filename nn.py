@@ -305,7 +305,7 @@ def update_parameters(parameters, grads, learning_rate):
     return parameters
 
 
-def l_layer_model(X, Y, layers_dims, learning_rate, num_iterations, batch_size):
+def l_layer_model(X, Y, layers_dims, learning_rate, num_iterations, batch_size, use_batchnorm=False):
     """
     Implements a L-layer neural network. All layers but the last should have the ReLU activation function,
     and the final layer will apply the softmax activation function.
@@ -322,6 +322,7 @@ def l_layer_model(X, Y, layers_dims, learning_rate, num_iterations, batch_size):
         num_iterations:
             The number of training examples used in each mini-batch. Affects training stability and speed.
         batch_size: the number of examples in a single training batch.
+        use_batchnorm: a boolean flag used to determine whether to apply batchnorm after the activation
 
     Returns:
         parameters – the parameters learnt by the system during the training
@@ -344,7 +345,7 @@ def l_layer_model(X, Y, layers_dims, learning_rate, num_iterations, batch_size):
             X_batch = X_shuffled[:, j:j + batch_size]
             Y_batch = Y_shuffled[:, j:j + batch_size]
 
-            AL, caches = l_model_forward(X_batch, parameters, False)
+            AL, caches = l_model_forward(X_batch, parameters, use_batchnorm)
             epoch_cost += compute_cost(AL, Y_batch)
             grads = l_model_backward(AL, Y_batch, caches)
             parameters = update_parameters(parameters, grads, learning_rate)
@@ -353,13 +354,14 @@ def l_layer_model(X, Y, layers_dims, learning_rate, num_iterations, batch_size):
     return parameters, costs
 
 
-def predict(X: np.ndarray, Y: np.ndarray, parameters: Dict):
+def predict(X: np.ndarray, Y: np.ndarray, parameters: Dict, use_batchnorm: bool = False) -> float:
     """
     The function receives an input data and the true labels and calculates the accuracy of the trained neural network on the data
     Args:
         X: the input data, a numpy array of shape (height*width, number_of_examples)
         Y: the “real” labels of the data, a vector of shape (num_of_classes, number of examples)
         parameters: a python dictionary containing the DNN architecture’s parameters
+        use_batchnorm: a boolean flag used to determine whether to apply batchnorm after the activation
 
     Returns:
         accuracy – the accuracy measure of the neural net on the provided data
@@ -367,7 +369,7 @@ def predict(X: np.ndarray, Y: np.ndarray, parameters: Dict):
         Use the softmax function to normalize the output values.
     """
     # Forward pass
-    AL, _ = l_model_forward(X, parameters, use_batchnorm=False)
+    AL, _ = l_model_forward(X, parameters, use_batchnorm=use_batchnorm)
 
     predictions = np.argmax(AL, axis=0)
     true_labels = np.argmax(Y, axis=0)
